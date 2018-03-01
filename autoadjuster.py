@@ -1,6 +1,5 @@
 import numpy as np
 import cv2
-import cv
 import math, os
 from PIL import Image
 from PIL.ExifTags import TAGS
@@ -21,7 +20,7 @@ def getImageDate(filename):
     return datetime.datetime.strptime(exifs['DateTimeOriginal'], "%Y:%m:%d %H:%M:%S")
 
 # set this paratemer according to your objective lens and sensor you're using
-pixelScaleInArcsecPerPixel = 7.29
+pixelScaleInArcsecPerPixel = 7.01
 
 if len(sys.argv) < 2:
     sys.exit('Usage: %s path-to-your-jpeg-files' % sys.argv[0])
@@ -31,8 +30,7 @@ directory = sys.argv[1]
 files = sorted(os.listdir(directory))
 firstFileDateTime = getImageDate(os.path.join(directory, files[0]))
 with open(os.path.join(directory,'results.csv'), 'wb') as csvfile:
-    resultWriter = csv.writer(csvfile, delimiter=' ',
-                            quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    resultWriter = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
     for i in range(1, len(files)):
         if not files[i].lower().endswith(".jpg"): 
             continue
@@ -43,7 +41,7 @@ with open(os.path.join(directory,'results.csv'), 'wb') as csvfile:
         src2 = cv2.imread(os.path.join(directory, files[i]),0) 
         src1np = np.float32(src1)  
         src2np = np.float32(src2) 
-        ret = cv2.phaseCorrelate(src1np,src2np)
+        ret, response = cv2.phaseCorrelate(src1np,src2np)
         
         pixelShift = math.sqrt(math.pow(ret[0], 2) + math.pow(ret[1], 2))
         angleShiftInDegrees = math.degrees(math.atan(ret[1] / ret[0]))
