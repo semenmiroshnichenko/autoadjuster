@@ -13,3 +13,24 @@ Then you put a camera on your astrotracker, start it and do shots every let say 
 Your camera should be positioned perpendicular to the axis of rotation.
 
 After some minutes of shots, copy pictures from camera to the PC and run a script with a full path to the directory with pictures as a first command line argument, like "python autoadjuster.py /home/test/astrostacker_pictures/"
+
+# Installation
+On Windows
+
+Install opencv: 
+
+``` choco install opencv 	``` 
+    
+`--> opencv 3.4.0`
+
+Install numpy:
+
+```pip install numpy```
+
+`--> numpy 1.14.0`
+
+Install pillow:
+
+```pip install pillow```
+
+`--> pillow 5.0.0`
