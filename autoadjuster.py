@@ -34,6 +34,13 @@ with open(os.path.join(directory,'results.csv'), 'wb') as csvfile:
     resultWriter = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
     firstFileDateTime = getImageDate(os.path.join(directory, files[0]))
     referenceImg = cv2.imread(os.path.join(directory, files[0]), cv2.IMREAD_GRAYSCALE | cv2.IMREAD_IGNORE_ORIENTATION)
+    
+    shape = np.shape(referenceImg)
+    templateSize = min(shape[0], shape[1]) / 4
+    print "Template size {0} px".format(templateSize)
+
+
+    
     for i in range(1, len(files)):
         if not files[i].lower().endswith(".jpg"): 
             continue
@@ -56,8 +63,7 @@ with open(os.path.join(directory,'results.csv'), 'wb') as csvfile:
         # resultWriter.writerow([timediff, errorInDegrees * 3600, angleShiftInDegrees])
 
         # matchTemplate
-        templateSize = 2000
-        shape = np.shape(referenceImg)
+
         y = int(shape[0] / 2) - int(templateSize / 2)
         x = int(shape[1] / 2) - int(templateSize / 2)
         template = referenceImg[y:y + templateSize, x: x + templateSize]
