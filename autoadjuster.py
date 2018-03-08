@@ -72,7 +72,7 @@ with open(os.path.join(directory,'results.csv'), 'wb') as csvfile:
         cv2.imshow("result", cv2.resize(src2copy, (0,0), fx=0.1, fy=0.1))
         cv2.waitKey(20)
         pixelShift = math.sqrt(math.pow(diff[0], 2) + math.pow(diff[1], 2))
-        angleShiftInDegrees = math.degrees(math.atan(diff[1] / diff[0]))
+        angleShiftInDegrees = math.degrees(math.atan(float(diff[1]) / float(diff[0])))
 
         angleDiff = (previousPixelShift + pixelShift) * pixelScaleInArcsecPerPixel / 3600
         timediff = fileDate - firstFileDateTime
@@ -83,6 +83,6 @@ with open(os.path.join(directory,'results.csv'), 'wb') as csvfile:
 
         if pixelShift > templateSize / 2:
             referenceImg = cv2.imread(os.path.join(directory, files[i]), cv2.IMREAD_GRAYSCALE | cv2.IMREAD_IGNORE_ORIENTATION)
-            previousPixelShift = pixelShift
+            previousPixelShift = previousPixelShift + pixelShift
 
     print 'Done!'
