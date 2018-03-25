@@ -31,7 +31,8 @@ files = sorted(os.listdir(directory))
 previousPixelShift = 0
 
 with open(os.path.join(directory,'results.csv'), 'wb') as csvfile:
-    resultWriter = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    resultWriter = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    resultWriter.writerow(["Time", "Tracking error in arcsec", "Y axis shift in pixel"])
     firstFileDateTime = getImageDate(os.path.join(directory, files[0]))
     referenceImg = cv2.imread(os.path.join(directory, files[0]), cv2.IMREAD_GRAYSCALE | cv2.IMREAD_IGNORE_ORIENTATION)
     
@@ -68,8 +69,8 @@ with open(os.path.join(directory,'results.csv'), 'wb') as csvfile:
         angleDiff = (previousPixelShift + pixelShift) * pixelScaleInArcsecPerPixel / 3600
         timediff = fileDate - firstFileDateTime
         errorInDegrees = angleDiff - timediff.seconds * anglePerSecInArcDegrees
-        print "matchTemplate at {0} tracking error {1} arcsec, shift {2} deg".format(timediff, errorInDegrees * 3600, angleShiftInDegrees)
-        resultWriter.writerow([timediff, errorInDegrees * 3600, angleShiftInDegrees])
+        print "matchTemplate at {0} tracking error {1} arcsec, Y axis shift {2} pixel".format(timediff, errorInDegrees * 3600, diff[1])
+        resultWriter.writerow([timediff, errorInDegrees * 3600, diff[1]])
 
 
         if pixelShift > templateSize / 2:
