@@ -48,21 +48,6 @@ with open(os.path.join(directory,'results.csv'), 'wb') as csvfile:
         fullpath = os.path.join(directory, files[i])
         fileDate = getImageDate(fullpath)
         actualImg = cv2.imread(os.path.join(directory, files[i]), cv2.IMREAD_GRAYSCALE | cv2.IMREAD_IGNORE_ORIENTATION) 
-        # src1np = np.float32(src1)  
-        # src2np = np.float32(src2) 
-        # ret, response = cv2.phaseCorrelate(src1np,src2np)
-        # print "phaseCorrelate result {0} {1}".format(ret[0], ret[1])
-        # pixelShift = math.sqrt(math.pow(ret[0], 2) + math.pow(ret[1], 2))
-        # angleShiftInDegrees = math.degrees(math.atan(ret[1] / ret[0]))
-
-        # angleDiff = pixelShift * pixelScaleInArcsecPerPixel / 3600
-        # #print angleDiff
-        # timediff = fileDate - firstFileDateTime
-        # errorInDegrees = angleDiff - timediff.seconds * anglePerSecInArcDegrees
-        # print "phaseCorrelate at {0} tracking error {1} arcsec, shift {2} deg".format(timediff, errorInDegrees * 3600, angleShiftInDegrees)
-        # resultWriter.writerow([timediff, errorInDegrees * 3600, angleShiftInDegrees])
-
-        # matchTemplate
 
         y = int(shape[0] / 2) - int(templateSize / 2)
         x = int(shape[1] / 2) - int(templateSize / 2)
