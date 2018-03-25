@@ -20,7 +20,7 @@ def getImageDate(filename):
     return datetime.datetime.strptime(exifs['DateTimeOriginal'], "%Y:%m:%d %H:%M:%S")
 
 # set this paratemer according to your objective lens and sensor you're using
-pixelScaleInArcsecPerPixel = 7.29
+pixelScaleInArcsecPerPixel = 7.32
 # pixelScaleInArcsecPerPixel = 23.4
 
 if len(sys.argv) < 2:
