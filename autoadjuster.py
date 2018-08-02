@@ -20,7 +20,7 @@ def getImageDate(filename):
     return datetime.datetime.strptime(exifs['DateTimeOriginal'], "%Y:%m:%d %H:%M:%S")
 
 # set this paratemer according to your objective lens and sensor you're using
-pixelScaleInArcsecPerPixel = 7.29
+pixelScaleInArcsecPerPixel = 7.32
 # pixelScaleInArcsecPerPixel = 23.4
 
 if len(sys.argv) < 2:
@@ -29,15 +29,18 @@ if len(sys.argv) < 2:
 directory = sys.argv[1]
 files = sorted(os.listdir(directory))
 previousPixelShift = 0
+previousYPixelShift = 0
 
 with open(os.path.join(directory,'results.csv'), 'wb') as csvfile:
-    resultWriter = csv.writer(csvfile, delimiter=' ', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    resultWriter = csv.writer(csvfile, delimiter=';', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+    resultWriter.writerow(["Time", "Tracking error in arcsec", "Y axis shift in pixel"])
     firstFileDateTime = getImageDate(os.path.join(directory, files[0]))
     referenceImg = cv2.imread(os.path.join(directory, files[0]), cv2.IMREAD_GRAYSCALE | cv2.IMREAD_IGNORE_ORIENTATION)
     
     shape = np.shape(referenceImg)
-    templateSize = min(shape[0], shape[1]) / 4
-    print "Template size {0} px".format(templateSize)
+    imageSize = min(shape[0], shape[1])
+    #templateSize = min(shape[0], shape[1]) / 4
+    #print "Template size {0} px".format(templateSize)
 
 
     
@@ -48,47 +51,40 @@ with open(os.path.join(directory,'results.csv'), 'wb') as csvfile:
         fullpath = os.path.join(directory, files[i])
         fileDate = getImageDate(fullpath)
         actualImg = cv2.imread(os.path.join(directory, files[i]), cv2.IMREAD_GRAYSCALE | cv2.IMREAD_IGNORE_ORIENTATION) 
-        # src1np = np.float32(src1)  
-        # src2np = np.float32(src2) 
-        # ret, response = cv2.phaseCorrelate(src1np,src2np)
-        # print "phaseCorrelate result {0} {1}".format(ret[0], ret[1])
-        # pixelShift = math.sqrt(math.pow(ret[0], 2) + math.pow(ret[1], 2))
-        # angleShiftInDegrees = math.degrees(math.atan(ret[1] / ret[0]))
 
-        # angleDiff = pixelShift * pixelScaleInArcsecPerPixel / 3600
-        # #print angleDiff
-        # timediff = fileDate - firstFileDateTime
-        # errorInDegrees = angleDiff - timediff.seconds * anglePerSecInArcDegrees
-        # print "phaseCorrelate at {0} tracking error {1} arcsec, shift {2} deg".format(timediff, errorInDegrees * 3600, angleShiftInDegrees)
-        # resultWriter.writerow([timediff, errorInDegrees * 3600, angleShiftInDegrees])
+        #y = int(shape[0] / 2) - int(templateSize / 2)
+        #x = int(shape[1] / 2) - int(templateSize / 2)
+        #template = referenceImg[y:y + templateSize, x: x + templateSize]
+        #cv2.imshow("template", cv2.resize(template, (0,0), fx=0.2, fy=0.2))
+        #matchTemplateResult = cv2.matchTemplate(actualImg, template, cv2.TM_CCOEFF_NORMED)
+        #minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(matchTemplateResult)
+        src1np = np.float32(referenceImg)  
+        src2np = np.float32(actualImg) 
+        ret, response = cv2.phaseCorrelate(src1np,src2np)
+        pixelShift = math.sqrt(math.pow(ret[0], 2) + math.pow(ret[1], 2))
 
-        # matchTemplate
-
-        y = int(shape[0] / 2) - int(templateSize / 2)
-        x = int(shape[1] / 2) - int(templateSize / 2)
-        template = referenceImg[y:y + templateSize, x: x + templateSize]
-        cv2.imshow("template", cv2.resize(template, (0,0), fx=0.2, fy=0.2))
-        matchTemplateResult = cv2.matchTemplate(actualImg, template, cv2.TM_CCOEFF_NORMED)
-        minVal, maxVal, minLoc, maxLoc = cv2.minMaxLoc(matchTemplateResult)
         
-        diff = (maxLoc[0] - x, maxLoc[1] - y)
+        #diff = (maxLoc[0] - x, maxLoc[1] - y)
+        diff = (ret[0], ret[1])
         print "matchTemplate pixel shift x:{0} y:{1}".format(diff[0], diff[1])
-        src2copy = actualImg.copy()
-        cv2.rectangle(src2copy, maxLoc, (maxLoc[0] + template.shape[0], maxLoc[1] + template.shape[1]) ,(255,255,255), 10)
-        cv2.imshow("result", cv2.resize(src2copy, (0,0), fx=0.1, fy=0.1))
-        cv2.waitKey(20)
+        #src2copy = actualImg.copy()
+        #cv2.rectangle(src2copy, maxLoc, (maxLoc[0] + template.shape[0], maxLoc[1] + template.shape[1]) ,(255,255,255), 10)
+        #cv2.imshow("result", cv2.resize(src2copy, (0,0), fx=0.1, fy=0.1))
+        #cv2.waitKey(20)
         pixelShift = math.sqrt(math.pow(diff[0], 2) + math.pow(diff[1], 2))
+        yAxisPixelShift = previousYPixelShift + diff[1]
         angleShiftInDegrees = math.degrees(math.atan(float(diff[1]) / float(diff[0])))
 
         angleDiff = (previousPixelShift + pixelShift) * pixelScaleInArcsecPerPixel / 3600
         timediff = fileDate - firstFileDateTime
         errorInDegrees = angleDiff - timediff.seconds * anglePerSecInArcDegrees
-        print "matchTemplate at {0} tracking error {1} arcsec, shift {2} deg".format(timediff, errorInDegrees * 3600, angleShiftInDegrees)
-        resultWriter.writerow([timediff, errorInDegrees * 3600, angleShiftInDegrees])
+        print "matchTemplate at {0} tracking error {1} arcsec, Y axis shift {2} pixel".format(timediff, errorInDegrees * 3600, yAxisPixelShift)
+        resultWriter.writerow([timediff, errorInDegrees * 3600, yAxisPixelShift])
 
 
-        if pixelShift > templateSize / 2:
+        #if pixelShift > templateSize / 2:
+        if pixelShift > imageSize / 4:
             referenceImg = cv2.imread(os.path.join(directory, files[i]), cv2.IMREAD_GRAYSCALE | cv2.IMREAD_IGNORE_ORIENTATION)
             previousPixelShift = previousPixelShift + pixelShift
-
+            previousYPixelShift = yAxisPixelShift
     print 'Done!'
