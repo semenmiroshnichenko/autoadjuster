@@ -1,9 +1,6 @@
 import sys, time, csv
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy import stats
-from datetime import timedelta
-import scipy.optimize
 
 if len(sys.argv) < 2:
     sys.exit('Usage: %s path-to-your-csv-file' % sys.argv[0])
